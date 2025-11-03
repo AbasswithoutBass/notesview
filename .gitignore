@@ -1,0 +1,42 @@
+# Node.js 依赖
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# 构建输出
+/build
+/dist
+*.tsbuildinfo
+
+# 开发工具
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 调试文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 测试覆盖率
+coverage/
+
+# 本地环境文件
+*.local
+
+# Vite
+.vite/
+
+# ESLint
+.eslintcache
