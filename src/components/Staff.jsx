@@ -2,17 +2,18 @@
 // ✅ Staff.jsx（VexFlow 最新兼容修正版）
 // 解决 NaN / Too many ticks / IncompleteVoice 错误
 // ===============================
-import React, { useEffect, useRef } from "react";
-import { Renderer, Stave, StaveNote, Voice, Formatter } from "vexflow";
+import { useEffect, useRef } from 'react';
+import { Renderer, Stave, StaveNote, Voice, Formatter } from 'vexflow';
+import PropTypes from 'prop-types';
 
-export default function Staff({ note = "C4", clef = "treble" }) {
+export default function Staff({ note = 'C4', clef = 'treble' }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     // 清空旧画布
-    containerRef.current.innerHTML = "";
+    containerRef.current.innerHTML = '';
 
     // 创建渲染器
     const renderer = new Renderer(containerRef.current, Renderer.Backends.SVG);
@@ -24,13 +25,13 @@ export default function Staff({ note = "C4", clef = "treble" }) {
     stave.addClef(clef).setContext(context).draw();
 
     // 转换音符格式，比如 C4 -> c/4
-    const key = note.toLowerCase().replace(/(\d)/, "/$1");
+    const key = note.toLowerCase().replace(/(\d)/, '/$1');
 
     // 创建音符
     const staveNote = new StaveNote({
       clef,
       keys: [key],
-      duration: "q", // 四分音符
+      duration: 'q', // 四分音符
     });
 
     // ✅ 新的 Voice 初始化方法（不使用过时参数）
@@ -42,25 +43,30 @@ export default function Staff({ note = "C4", clef = "treble" }) {
     new Formatter().joinVoices([voice]).format([voice], 250);
     voice.draw(context, stave);
 
-    console.log("✅ 五线谱绘制成功，音符：", note);
+    // 五线谱绘制完成
   }, [note, clef]);
 
   return (
-    <div style={{ textAlign: "center", marginTop: "10px" }}>
-      <div style={{ marginBottom: "8px", fontSize: "16px", color: "#444" }}>
+    <div style={{ textAlign: 'center', marginTop: '10px' }}>
+      <div style={{ marginBottom: '8px', fontSize: '16px', color: '#444' }}>
         🎵 当前音符：<strong>{note}</strong>
       </div>
       <div
         ref={containerRef}
         style={{
-          width: "350px",
-          height: "160px",
-          margin: "0 auto",
-          backgroundColor: "#fafafa",
-          borderRadius: "8px",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+          width: '350px',
+          height: '160px',
+          margin: '0 auto',
+          backgroundColor: '#fafafa',
+          borderRadius: '8px',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
         }}
       ></div>
     </div>
   );
 }
+
+Staff.propTypes = {
+  note: PropTypes.string,
+  clef: PropTypes.oneOf(['treble', 'bass', 'alto', 'tenor']),
+};

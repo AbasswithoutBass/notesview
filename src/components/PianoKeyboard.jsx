@@ -2,40 +2,102 @@
 // 功能：
 // 1. 显示简单的白键与黑键
 // 2. 点击键盘可播放音符
-// 3. 高亮当前按下的键（未来版本会与游戏模式联动）
+// 3. 高亮当前按下的键
 
-import React from "react";
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
+import PianoKey from './PianoKey';
 
-const WHITE_KEYS = ["C", "D", "E", "F", "G", "A", "B"];
-const BLACK_KEYS = ["C#", "D#", "F#", "G#", "A#"];
+const WHITE_KEYS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const BLACK_KEYS = ['C#', 'D#', 'F#', 'G#', 'A#'];
 
-export default function PianoKeyboard({ onPlayNote }) {
-  const play = (note) => {
+const BLACK_KEY_OFFSETS = {
+  'C#': 0.75,
+  'D#': 1.75,
+  'F#': 3.75,
+  'G#': 4.75,
+  'A#': 5.75,
+};
+
+const KEY_WIDTH = 48; // 白键宽度
+
+export default function PianoKeyboard({ onPlayNote, currentNote }) {
+  const [activeKey, setActiveKey] = useState(null);
+
+  // 处理当前音符变化
+  useEffect(() => {
+    if (currentNote) {
+      setActiveKey(currentNote);
+      const timer = setTimeout(() => setActiveKey(null), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [currentNote]);
+
+  const handlePlay = note => {
+    setActiveKey(note);
     if (onPlayNote) onPlayNote(note);
   };
 
   return (
-    <div className="relative flex justify-center mt-6">
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      justifyContent: 'center',
+      marginTop: '1.5rem',
+      width: 'fit-content',
+      margin: '1.5rem auto'
+    }}>
       {/* 白键 */}
-      {WHITE_KEYS.map((note, idx) => (
-        <div
-          key={note}
-          onClick={() => play(note + "4")}
-          className="w-12 h-40 bg-white border border-gray-400 cursor-pointer active:bg-yellow-200"
-          style={{ zIndex: 1 }}
-        />
-      ))}
+      <div style={{ 
+        display: 'flex', 
+        position: 'relative', 
+        zIndex: 1,
+        backgroundColor: '#fff',
+        borderRadius: '0 0 6px 6px',
+        padding: '0 1px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+      }}>
+        {WHITE_KEYS.map((note) => (
+          <PianoKey
+            key={note}
+            note={note + '4'}
+            onClick={handlePlay}
+            isActive={activeKey === note + '4'}
+          />
+        ))}
+      </div>
 
-      {/* 黑键（相对定位覆盖） */}
-      <div className="absolute top-0 left-6 flex space-x-8">
-        {BLACK_KEYS.map((note) => (
+      {/* 黑键 */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        display: 'flex',
+        zIndex: 2
+      }}>
+        {BLACK_KEYS.map(note => (
           <div
             key={note}
-            onClick={() => play(note + "4")}
-            className="w-8 h-24 bg-black cursor-pointer active:bg-gray-700"
-          />
+            style={{
+              position: 'absolute',
+              left: `${BLACK_KEY_OFFSETS[note] * KEY_WIDTH}px`,
+            }}
+          >
+            <PianoKey
+              note={note + '4'}
+              isBlack
+              onClick={handlePlay}
+              isActive={activeKey === note + '4'}
+            />
+          </div>
         ))}
       </div>
     </div>
   );
 }
+
+PianoKeyboard.propTypes = {
+  onPlayNote: PropTypes.func.isRequired,
+  currentNote: PropTypes.string,
+};

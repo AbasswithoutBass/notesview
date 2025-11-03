@@ -10,7 +10,11 @@ export default defineConfig({
     outDir: 'dist' // 打包输出目录
   },
   server: {
-    port: 5173, // 启动端口
-    open: true  // 自动打开浏览器
+    port: 5175, // 启动端口
+    open: true, // 自动打开浏览器
+    hmr: {
+      host: 'localhost',
+      port: 5175
+    }
   }
 })
