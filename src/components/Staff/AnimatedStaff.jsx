@@ -6,14 +6,7 @@
 // 3. 高亮当前音符
 
 import { useEffect, useRef, useState } from 'react';
-import {
-  Renderer,
-  Stave,
-  StaveNote,
-  Voice,
-  Formatter,
-  Accidental
-} from 'vexflow';
+import { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } from 'vexflow';
 import PropTypes from 'prop-types';
 
 export default function AnimatedStaff({ note, notes, clef = 'treble', hideLabels = false }) {
@@ -25,9 +18,15 @@ export default function AnimatedStaff({ note, notes, clef = 'treble', hideLabels
   const previousSignature = useRef(displaySignature);
 
   // 计算音符的垂直位置（用于动画）
-  const getNotePosition = (noteName) => {
+  const getNotePosition = noteName => {
     const noteMap = {
-      'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6
+      C: 0,
+      D: 1,
+      E: 2,
+      F: 3,
+      G: 4,
+      A: 5,
+      B: 6,
     };
     const baseName = noteName.replace(/[0-9#b]/g, '');
     return noteMap[baseName] || 0;
@@ -82,20 +81,19 @@ export default function AnimatedStaff({ note, notes, clef = 'treble', hideLabels
     staveNote.setStyle({ fillStyle: '#2563eb', strokeStyle: '#2563eb' });
 
     // 创建 Voice 并绘制
-  const voice = new Voice({ num_beats: 4, beat_value: 4 });
+    const voice = new Voice({ num_beats: 4, beat_value: 4 });
     voice.setStrict(false);
     voice.addTickables([staveNote]);
 
     new Formatter().joinVoices([voice]).format([voice], 420);
     voice.draw(context, stave);
-
   }, [displaySignature, clef]);
 
   return (
     <div style={{ position: 'relative' }}>
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
         {!hideLabels && (
-          <div 
+          <div
             style={{
               fontSize: '1.125rem',
               fontWeight: 'bold',
@@ -123,7 +121,7 @@ export default function AnimatedStaff({ note, notes, clef = 'treble', hideLabels
         />
       </div>
       {/* 音符位置指示器 */}
-      <div 
+      <div
         style={{
           position: 'absolute',
           left: 0,

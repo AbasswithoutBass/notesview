@@ -3,7 +3,7 @@ const STORAGE_KEYS = {
   HIGH_SCORES: 'notesview_high_scores',
   USER_STATS: 'notesview_user_stats',
   SETTINGS: 'notesview_settings',
-  MEMORY: 'notesview_memory_curve'
+  MEMORY: 'notesview_memory_curve',
 };
 
 const DEFAULT_USER_STATS = {
@@ -12,7 +12,7 @@ const DEFAULT_USER_STATS = {
   correctNotes: 0,
   totalNotes: 0,
   averageTime: 0,
-  highestCombo: 0
+  highestCombo: 0,
 };
 
 // 保存数据到本地存储
@@ -27,7 +27,7 @@ export const saveToStorage = (key, data) => {
 };
 
 // 从本地存储读取数据
-export const loadFromStorage = (key) => {
+export const loadFromStorage = key => {
   try {
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : null;
@@ -41,7 +41,7 @@ export const loadFromStorage = (key) => {
 export const saveHighScore = (difficulty, score) => {
   const highScores = loadFromStorage(STORAGE_KEYS.HIGH_SCORES) || {};
   const currentHigh = highScores[difficulty] || 0;
-  
+
   if (score > currentHigh) {
     highScores[difficulty] = score;
     saveToStorage(STORAGE_KEYS.HIGH_SCORES, highScores);
@@ -58,14 +58,15 @@ export const getUserStats = () => {
 };
 
 // 更新用户统计数据
-export const updateUserStats = (stats) => {
+export const updateUserStats = stats => {
   const currentStats = getUserStats();
   const sessionNotes = stats.totalNotes || 0;
   const combinedTotalNotes = currentStats.totalNotes + sessionNotes;
   const sessionCorrect = stats.correctNotes || 0;
   const sessionScore = stats.totalScore || 0;
   const sessionAverageTime = stats.averageTime || 0;
-  const accumulatedTime = currentStats.averageTime * currentStats.totalNotes + sessionAverageTime * sessionNotes;
+  const accumulatedTime =
+    currentStats.averageTime * currentStats.totalNotes + sessionAverageTime * sessionNotes;
   const newAverageTime = combinedTotalNotes > 0 ? accumulatedTime / combinedTotalNotes : 0;
 
   const newStats = {
@@ -74,7 +75,7 @@ export const updateUserStats = (stats) => {
     correctNotes: currentStats.correctNotes + sessionCorrect,
     totalNotes: combinedTotalNotes,
     averageTime: newAverageTime,
-    highestCombo: Math.max(currentStats.highestCombo, stats.maxCombo || stats.highestCombo || 0)
+    highestCombo: Math.max(currentStats.highestCombo, stats.maxCombo || stats.highestCombo || 0),
   };
 
   saveToStorage(STORAGE_KEYS.USER_STATS, newStats);
@@ -83,7 +84,7 @@ export const updateUserStats = (stats) => {
 
 export const loadMemoryData = () => loadFromStorage(STORAGE_KEYS.MEMORY) || {};
 
-export const saveMemoryData = (memory) => saveToStorage(STORAGE_KEYS.MEMORY, memory);
+export const saveMemoryData = memory => saveToStorage(STORAGE_KEYS.MEMORY, memory);
 
 export const clearStatsData = () => {
   try {

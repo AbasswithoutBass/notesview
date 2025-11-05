@@ -2,7 +2,7 @@ import { loadMemoryData, saveMemoryData } from './storage';
 
 const REVIEW_INTERVALS = [60000, 300000, 1800000, 21600000, 86400000]; // 1min, 5min, 30min, 6h, 24h
 
-const parseNotes = (notes) => {
+const parseNotes = notes => {
   if (!Array.isArray(notes)) return [];
   return [...new Set(notes.filter(Boolean))];
 };
@@ -16,11 +16,11 @@ const getMemoryKey = (note, clef = null) => {
 };
 
 // 从内存键提取音符和谱号
-const parseMemoryKey = (key) => {
+const parseMemoryKey = key => {
   const parts = key.split('@');
   return {
     note: parts[0],
-    clef: parts[1] || null
+    clef: parts[1] || null,
   };
 };
 
@@ -40,8 +40,8 @@ export const recordMemoryResult = (notes, isCorrect, clef = null) => {
       stage: 0,
       nextDue: now,
       lastReviewed: 0,
-      note,     // 保存原始音符
-      clef      // 保存谱号
+      note, // 保存原始音符
+      clef, // 保存谱号
     };
 
     if (isCorrect) {
@@ -110,7 +110,7 @@ export const getMemorySummary = (memoryMap, clef = null) => {
   if (entries.length === 0) {
     return {
       due: [],
-      challenging: []
+      challenging: [],
     };
   }
 
@@ -140,7 +140,7 @@ export const getMemorySummary = (memoryMap, clef = null) => {
       stage: data.stage,
       correct: data.correct || 0,
       wrong: data.wrong || 0,
-      clef: data.clef
+      clef: data.clef,
     }));
 
   const challenging = filteredEntries
@@ -155,7 +155,7 @@ export const getMemorySummary = (memoryMap, clef = null) => {
         successRate,
         nextDue: data.nextDue,
         stage: data.stage,
-        clef: data.clef
+        clef: data.clef,
       };
     })
     .sort((a, b) => {
@@ -169,7 +169,7 @@ export const getMemorySummary = (memoryMap, clef = null) => {
 
   return {
     due,
-    challenging
+    challenging,
   };
 };
 

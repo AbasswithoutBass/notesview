@@ -36,17 +36,17 @@ export const useAudio = () => {
       if (!audioContext.current) {
         audioContext.current = new (window.AudioContext || window.webkitAudioContext)();
       }
-      
+
       // 检查音频上下文状态，如果是暂停状态就恢复
       if (audioContext.current.state === 'suspended') {
         await audioContext.current.resume();
       }
-      
+
       // 检查 Tone 的状态，如果未启动则启动
       if (Tone.context.state === 'suspended') {
         await Tone.context.resume();
       }
-      
+
       // 启动 Tone.js（需要用户交互）
       if (Tone.context.state !== 'running') {
         await Tone.start();
@@ -56,14 +56,14 @@ export const useAudio = () => {
       if (!synth.current) {
         synth.current = new Tone.Synth({
           oscillator: {
-            type: 'triangle'
+            type: 'triangle',
           },
           envelope: {
             attack: 0.005,
             decay: 0.1,
             sustain: 0.3,
-            release: 1
-          }
+            release: 1,
+          },
         }).toDestination();
 
         // 预加载并编译音频处理工作负载
@@ -72,7 +72,7 @@ export const useAudio = () => {
 
       // 尝试播放一个静音的测试音符以确保一切正常
       await synth.current.triggerAttackRelease('C4', '32n', undefined, 0);
-      
+
       return true;
     } catch (err) {
       console.error('Audio initialization failed:', err);
@@ -88,7 +88,7 @@ export const useAudio = () => {
     // 确保与上一次播放间隔至少 0.1 秒
     const playTime = Math.max(now, lastPlayTime.current + 0.1);
     const gain = Math.min(Math.max(velocity, 0.05), 1);
-    
+
     try {
       synth.current.triggerAttackRelease(note, '8n', playTime, gain);
       lastPlayTime.current = playTime;
@@ -106,16 +106,11 @@ export const useAudio = () => {
     const now = Tone.now();
     const playTime = Math.max(now, lastPlayTime.current + 0.1);
     const gain = Math.min(Math.max(velocity, 0.05), 1);
-    
+
     try {
       notes.forEach((note, index) => {
         // 稍微错开每个音符的播放时间，创造琶音效果
-        synth.current.triggerAttackRelease(
-          note,
-          duration,
-          playTime + index * 0.05,
-          gain
-        );
+        synth.current.triggerAttackRelease(note, duration, playTime + index * 0.05, gain);
       });
       lastPlayTime.current = playTime + (notes.length - 1) * 0.05;
       return true;

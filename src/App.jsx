@@ -5,7 +5,6 @@
 
 import { useAudio } from './hooks/useAudio.jsx';
 import { usePractice } from './hooks/usePractice.jsx';
-import { useMidi } from './hooks/useMidi.jsx';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { mapKeyToNote, KEYBOARD_LAYOUTS } from './utils/keymap';
 import PracticeMode from './components/Practice/PracticeMode';
@@ -83,52 +82,67 @@ function App() {
   };
 
   // 播放音符（供键盘和虚拟钢琴使用）
-  const handlePlay = useCallback((noteToPlay, options = {}) => {
-    if (!isReady || inputDisabled) return;
-    let fullNote = noteToPlay || 'C4';
-    const velocity = Math.min(Math.max(options.velocity ?? 1, 0.05), 1);
+  const handlePlay = useCallback(
+    (noteToPlay, options = {}) => {
+      if (!isReady || inputDisabled) return;
+      let fullNote = noteToPlay || 'C4';
+      const velocity = Math.min(Math.max(options.velocity ?? 1, 0.05), 1);
 
-    // 在练习模式中，如果启用了忽略八度，需要使用乐谱中的八度来播放音符
-    if (mode === 'practice' && practice.isPlaying && practice.ignoreOctave && practice.currentNotes.length > 0) {
-      // 从乐谱中提取第一个音符的八度
-      const staffNote = practice.currentNotes[0];
-      const staffOctaveMatch = staffNote.match(/(\d)$/);
-      if (staffOctaveMatch) {
-        const staffOctave = staffOctaveMatch[1];
-        // 提取琴键音符的音名部分（去掉八度）
-        const noteNameMatch = fullNote.match(/^([A-G][#b]?)/);
-        if (noteNameMatch) {
-          const noteName = noteNameMatch[1];
-          fullNote = `${noteName}${staffOctave}`;
+      // 在练习模式中，如果启用了忽略八度，需要使用乐谱中的八度来播放音符
+      if (
+        mode === 'practice' &&
+        practice.isPlaying &&
+        practice.ignoreOctave &&
+        practice.currentNotes.length > 0
+      ) {
+        // 从乐谱中提取第一个音符的八度
+        const staffNote = practice.currentNotes[0];
+        const staffOctaveMatch = staffNote.match(/(\d)$/);
+        if (staffOctaveMatch) {
+          const staffOctave = staffOctaveMatch[1];
+          // 提取琴键音符的音名部分（去掉八度）
+          const noteNameMatch = fullNote.match(/^([A-G][#b]?)/);
+          if (noteNameMatch) {
+            const noteName = noteNameMatch[1];
+            fullNote = `${noteName}${staffOctave}`;
+          }
         }
       }
-    }
 
-    setNote(fullNote);
-    playNote(fullNote, velocity);
+      setNote(fullNote);
+      playNote(fullNote, velocity);
 
-    // 如果在练习模式中，也处理练习逻辑
-    if (mode === 'practice' && practice.isPlaying) {
-      practice.handleNoteInput(fullNote, options);
-    }
-  }, [isReady, inputDisabled, playNote, mode, practice.isPlaying, practice.ignoreOctave, practice.currentNotes, practice.handleNoteInput]);
+      // 如果在练习模式中，也处理练习逻辑
+      if (mode === 'practice' && practice.isPlaying) {
+        practice.handleNoteInput(fullNote, options);
+      }
+    },
+    [
+      isReady,
+      inputDisabled,
+      playNote,
+      mode,
+      practice.isPlaying,
+      practice.ignoreOctave,
+      practice.currentNotes,
+      practice.handleNoteInput,
+    ]
+  );
 
-  const handleMidiNoteOn = useCallback(({ note: midiNote, velocity }) => {
-    if (inputDisabled) return;
-    const active = activeMidiNotes.current;
-    if (active.has(midiNote)) return;
-    active.add(midiNote);
-    handlePlay(midiNote, { source: 'midi', velocity });
-  }, [handlePlay, inputDisabled]);
+  const handleMidiNoteOn = useCallback(
+    ({ note: midiNote, velocity }) => {
+      if (inputDisabled) return;
+      const active = activeMidiNotes.current;
+      if (active.has(midiNote)) return;
+      active.add(midiNote);
+      handlePlay(midiNote, { source: 'midi', velocity });
+    },
+    [handlePlay, inputDisabled]
+  );
 
   const handleMidiNoteOff = useCallback(({ note: midiNote }) => {
     activeMidiNotes.current.delete(midiNote);
   }, []);
-
-  const midi = useMidi({
-    onNoteOn: handleMidiNoteOn,
-    onNoteOff: handleMidiNoteOff
-  });
 
   useEffect(() => {
     if (inputDisabled) {
@@ -165,7 +179,7 @@ function App() {
     const handleKeyDown = e => {
       if (!isReady || inputDisabled) return; // 未启动音频时或竖屏限制时不响应
       if (e.repeat) return;
-      
+
       // 遍历所有布局尝试映射音符
       const layouts = [layout, KEYBOARD_LAYOUTS.LOGIC_PRO, KEYBOARD_LAYOUTS.NUMBER];
       let matchedNote = null;
@@ -174,7 +188,7 @@ function App() {
         const result = mapKeyToNote(e.key, octave, {
           layout: currentLayout,
           isShift: e.shiftKey,
-          isAlt: e.altKey
+          isAlt: e.altKey,
         });
 
         if (result) {
@@ -199,29 +213,33 @@ function App() {
   }, [octave, isReady, layout, handlePlay, inputDisabled]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      fontFamily: "'Noto Sans', sans-serif",
-      minHeight: '100vh',
-      backgroundColor: '#fdf2f8',
-      padding: '2rem'
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        fontFamily: "'Noto Sans', sans-serif",
+        minHeight: '100vh',
+        backgroundColor: '#fdf2f8',
+        padding: '2rem',
+      }}
+    >
       {showOrientationOverlay && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(17, 24, 39, 0.85)',
-          color: 'white',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          padding: '2rem',
-          zIndex: 9999
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(17, 24, 39, 0.85)',
+            color: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '2rem',
+            zIndex: 9999,
+          }}
+        >
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔁 请横屏使用</div>
           <p style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>
             检测到当前为竖屏模式。为获得完整体验，请旋转设备至横屏后继续。
@@ -229,27 +247,35 @@ function App() {
         </div>
       )}
       {/* 页面头部 */}
-      <header style={{
-        width: '100%',
-        maxWidth: '1200px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem'
-      }}>
-        <h1 style={{
-          fontSize: '1.875rem',
-          fontWeight: 'bold'
-        }}>🎶 Piano Reading Trainer</h1>
+      <header
+        style={{
+          width: '100%',
+          maxWidth: '1200px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '2rem',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '1.875rem',
+            fontWeight: 'bold',
+          }}
+        >
+          🎶 Piano Reading Trainer
+        </h1>
 
         {isReady && (
-          <div style={{
-            display: 'flex',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'flex-end'
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '1rem',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+            }}
+          >
             <button
               onClick={async () => {
                 if (practice.isPlaying) {
@@ -279,7 +305,7 @@ function App() {
                 color: mode === 'practice' && !showStats ? 'white' : '#4b5563',
                 borderRadius: '0.5rem',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               练习模式
@@ -298,7 +324,7 @@ function App() {
                 color: mode === 'free' && !showStats ? 'white' : '#4b5563',
                 borderRadius: '0.5rem',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               自由模式
@@ -316,7 +342,7 @@ function App() {
                 color: showStats ? 'white' : '#4b5563',
                 borderRadius: '0.5rem',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               统计信息
@@ -333,26 +359,30 @@ function App() {
                 cursor: isMidiConnecting ? 'wait' : 'pointer',
                 opacity: isMidiConnecting ? 0.6 : 1,
                 minWidth: '110px',
-                marginLeft: 'auto'
+                marginLeft: 'auto',
               }}
             >
               {midi.isEnabled ? '断开 MIDI' : '连接 MIDI'}
             </button>
             {midi.isEnabled && (
-              <span style={{
-                fontSize: '0.85rem',
-                color: '#047857',
-                fontWeight: 600
-              }}>
+              <span
+                style={{
+                  fontSize: '0.85rem',
+                  color: '#047857',
+                  fontWeight: 600,
+                }}
+              >
                 已连接：{midi.devices.length ? midi.devices.join('、') : 'MIDI 设备'}
               </span>
             )}
             {midi.error && !midi.isEnabled && (
-              <span style={{
-                fontSize: '0.8rem',
-                color: '#b91c1c',
-                fontWeight: 500
-              }}>
+              <span
+                style={{
+                  fontSize: '0.8rem',
+                  color: '#b91c1c',
+                  fontWeight: 500,
+                }}
+              >
                 {midi.error}
               </span>
             )}
@@ -362,21 +392,26 @@ function App() {
 
       {/* 音频初始化按钮 */}
       {!isReady ? (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '2rem',
-          marginTop: '4rem'
-        }}>
-          <h2 style={{
-            fontSize: '1.5rem',
-            color: '#1f2937',
-            textAlign: 'center',
-            maxWidth: '600px',
-            lineHeight: '1.5'
-          }}>
-            欢迎使用钢琴视奏训练器！<br/>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '2rem',
+            marginTop: '4rem',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '1.5rem',
+              color: '#1f2937',
+              textAlign: 'center',
+              maxWidth: '600px',
+              lineHeight: '1.5',
+            }}
+          >
+            欢迎使用钢琴视奏训练器！
+            <br />
             这个工具将帮助你提高五线谱阅读能力。
           </h2>
           <button
@@ -390,10 +425,10 @@ function App() {
               transition: 'all 0.2s',
               cursor: 'pointer',
               fontSize: '1.25rem',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
             }}
-            onMouseOver={e => e.target.style.transform = 'scale(1.05)'}
-            onMouseOut={e => e.target.style.transform = 'scale(1)'}
+            onMouseOver={e => (e.target.style.transform = 'scale(1.05)')}
+            onMouseOut={e => (e.target.style.transform = 'scale(1)')}
           >
             点击启动音频系统 🎵
           </button>
@@ -412,7 +447,7 @@ function App() {
 
           {/* 练习模式 */}
           {mode === 'practice' && !showStats && (
-              <PracticeMode
+            <PracticeMode
               difficulty={practice.difficulty}
               onChangeDifficulty={practice.setDifficulty}
               clef={practice.clef}
@@ -436,28 +471,29 @@ function App() {
 
           {/* 自由模式 */}
           {mode === 'free' && !showStats && (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '2rem'
-            }}>
-              <AnimatedStaff note={note} clef="treble" />
-              <PianoKeyboard 
-                onPlayNote={handlePlay}
-                currentNote={note}
-              />
-              <div style={{
+            <div
+              style={{
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '1rem'
-              }}>
-                <label 
+                gap: '2rem',
+              }}
+            >
+              <AnimatedStaff note={note} clef="treble" />
+              <PianoKeyboard onPlayNote={handlePlay} currentNote={note} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                }}
+              >
+                <label
                   htmlFor="keyboard-layout-selector"
                   style={{
                     color: '#4b5563',
                     fontWeight: '500',
-                    marginRight: '0.5rem'
+                    marginRight: '0.5rem',
                   }}
                 >
                   键盘布局：
@@ -465,24 +501,24 @@ function App() {
                 <select
                   id="keyboard-layout-selector"
                   value={layout.name}
-                  onChange={(e) => setLayout(
-                    e.target.value === 'Logic Pro 风格' 
-                      ? KEYBOARD_LAYOUTS.LOGIC_PRO 
-                      : KEYBOARD_LAYOUTS.NUMBER
-                  )}
+                  onChange={e =>
+                    setLayout(
+                      e.target.value === 'Logic Pro 风格'
+                        ? KEYBOARD_LAYOUTS.LOGIC_PRO
+                        : KEYBOARD_LAYOUTS.NUMBER
+                    )
+                  }
                   style={{
                     padding: '0.5rem 1rem',
                     borderRadius: '0.5rem',
                     border: '1px solid #d1d5db',
-                    backgroundColor: 'white'
+                    backgroundColor: 'white',
                   }}
                 >
                   <option value="Logic Pro 风格">Logic Pro 风格</option>
                   <option value="数字键">数字键模式</option>
                 </select>
-                <span style={{ color: '#4b5563', fontWeight: '500' }}>
-                  当前八度：{octave}
-                </span>
+                <span style={{ color: '#4b5563', fontWeight: '500' }}>当前八度：{octave}</span>
               </div>
               <KeyboardHints layout={layout} />
             </div>

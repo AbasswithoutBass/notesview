@@ -24,12 +24,10 @@ export default function PianoKey({ note, isBlack, onTrigger, isActive }) {
     transition: 'transform 0.1s ease, background-color 0.1s ease',
     transform: isPressed ? 'translateY(2px)' : 'translateY(0)',
     position: 'relative',
-    boxShadow: isBlack
-      ? '0 0 3px rgba(0,0,0,0.4)'
-      : '0 2px 4px rgba(0,0,0,0.1)',
+    boxShadow: isBlack ? '0 0 3px rgba(0,0,0,0.4)' : '0 2px 4px rgba(0,0,0,0.1)',
     margin: isBlack ? '0' : '0 1px',
     touchAction: 'none',
-    userSelect: 'none'
+    userSelect: 'none',
   };
 
   const pressedStyles = isBlack
@@ -46,11 +44,11 @@ export default function PianoKey({ note, isBlack, onTrigger, isActive }) {
       'F#': 'Gb',
       'G#': 'Ab',
       'A#': 'Bb',
-      'Db': 'C#',
-      'Eb': 'D#',
-      'Gb': 'F#',
-      'Ab': 'G#',
-      'Bb': 'A#',
+      Db: 'C#',
+      Eb: 'D#',
+      Gb: 'F#',
+      Ab: 'G#',
+      Bb: 'A#',
     };
     const base = note.replace(/\d/g, '');
     if (enharmonicMap[base] && !displayNames.includes(enharmonicMap[base])) {
@@ -58,7 +56,7 @@ export default function PianoKey({ note, isBlack, onTrigger, isActive }) {
     }
   }
 
-  const handlePointerDown = (event) => {
+  const handlePointerDown = event => {
     event.preventDefault();
     if (!isPressed) {
       setIsPressed(true);
@@ -86,19 +84,21 @@ export default function PianoKey({ note, isBlack, onTrigger, isActive }) {
       }}
     >
       {/* 音符提示 */}
-      <div style={{
-        position: 'absolute',
-        bottom: isBlack ? '8px' : '12px',
-        left: 0,
-        right: 0,
-        textAlign: 'center',
-        fontSize: '0.75rem',
-        color: isBlack ? '#ffffff80' : '#64748b',
-        pointerEvents: 'none',
-        userSelect: 'none',
-        fontWeight: '500',
-        lineHeight: 1.1,
-      }}>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: isBlack ? '8px' : '12px',
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          fontSize: '0.75rem',
+          color: isBlack ? '#ffffff80' : '#64748b',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          fontWeight: '500',
+          lineHeight: 1.1,
+        }}
+      >
         {displayNames.join(' / ')}
       </div>
     </div>

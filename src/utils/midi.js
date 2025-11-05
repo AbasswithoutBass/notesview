@@ -1,6 +1,6 @@
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-export const midiNumberToNote = (number) => {
+export const midiNumberToNote = number => {
   if (!Number.isFinite(number)) return null;
   const normalized = Math.max(0, Math.min(127, Math.round(number)));
   const noteIndex = normalized % 12;
@@ -8,7 +8,7 @@ export const midiNumberToNote = (number) => {
   return `${NOTE_NAMES[noteIndex]}${octave}`;
 };
 
-export const normalizeVelocity = (velocity) => {
+export const normalizeVelocity = velocity => {
   if (!Number.isFinite(velocity)) return 1;
   const clamped = Math.max(0, Math.min(velocity, 127));
   return clamped / 127;

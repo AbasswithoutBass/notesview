@@ -1,4 +1,3 @@
-
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 
@@ -33,33 +32,39 @@ export default function Timer({ duration, onComplete, isRunning, resetKey }) {
   const seconds = (timeLeft / 1000).toFixed(1);
 
   return (
-    <div style={{
-      textAlign: 'center',
-      padding: '0.5rem',
-      borderRadius: '0.5rem',
-      backgroundColor: timeLeft < duration * 0.3 ? '#fee2e2' : '#f0fdf4',
-      transition: 'background-color 0.3s'
-    }}>
-      <div style={{
-        fontSize: '1.25rem',
-        fontWeight: 'bold',
-        color: timeLeft < duration * 0.3 ? '#dc2626' : '#059669'
-      }}>
+    <div
+      style={{
+        textAlign: 'center',
+        padding: '0.5rem',
+        borderRadius: '0.5rem',
+        backgroundColor: timeLeft < duration * 0.3 ? '#fee2e2' : '#f0fdf4',
+        transition: 'background-color 0.3s',
+      }}
+    >
+      <div
+        style={{
+          fontSize: '1.25rem',
+          fontWeight: 'bold',
+          color: timeLeft < duration * 0.3 ? '#dc2626' : '#059669',
+        }}
+      >
         {seconds}s
       </div>
-      <div style={{
-        width: '100%',
-        height: '4px',
-        backgroundColor: '#e5e7eb',
-        borderRadius: '2px',
-        overflow: 'hidden'
-      }}>
+      <div
+        style={{
+          width: '100%',
+          height: '4px',
+          backgroundColor: '#e5e7eb',
+          borderRadius: '2px',
+          overflow: 'hidden',
+        }}
+      >
         <div
           style={{
             width: `${(timeLeft / duration) * 100}%`,
             height: '100%',
             backgroundColor: timeLeft < duration * 0.3 ? '#dc2626' : '#059669',
-            transition: 'width 0.1s linear'
+            transition: 'width 0.1s linear',
           }}
         />
       </div>
@@ -80,9 +85,9 @@ Timer.defaultProps = {
 Timer.propTypes = {
   duration: PropTypes.number.isRequired,
   onComplete: PropTypes.func,
-  isRunning: PropTypes.bool
+  isRunning: PropTypes.bool,
 };
 
 Timer.defaultProps = {
-  isRunning: false
+  isRunning: false,
 };

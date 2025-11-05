@@ -60,18 +60,14 @@ const OCTAVE_RANGE = {
  * @returns {Object} 返回音符信息
  */
 export function mapKeyToNote(key, currentOctave = 4, options = {}) {
-  const {
-    layout = KEYBOARD_LAYOUTS.LOGIC_PRO,
-    isShift = false,
-    isAlt = false,
-  } = options;
+  const { layout = KEYBOARD_LAYOUTS.LOGIC_PRO, isShift = false, isAlt = false } = options;
 
   // 处理八度变化
   if (key === FUNCTION_KEYS.OCTAVE_UP) {
     const newOctave = Math.min(currentOctave + 1, OCTAVE_RANGE.MAX);
     return { type: 'octave', octave: newOctave };
   }
-  
+
   if (key === FUNCTION_KEYS.OCTAVE_DOWN) {
     const newOctave = Math.max(currentOctave - 1, OCTAVE_RANGE.MIN);
     return { type: 'octave', octave: newOctave };
@@ -96,7 +92,7 @@ export function mapKeyToNote(key, currentOctave = 4, options = {}) {
       'G#': 'Ab',
       'A#': 'Bb',
     };
-    modifiedNote = flatNotes[modifiedNote] || (baseNote + 'b');
+    modifiedNote = flatNotes[modifiedNote] || baseNote + 'b';
   }
 
   return {
@@ -134,7 +130,7 @@ export function getKeyboardHints(layout = KEYBOARD_LAYOUTS.LOGIC_PRO) {
  */
 export function isValidNote(note) {
   if (!note || typeof note !== 'string') return false;
-  
+
   const match = note.match(/^([A-G][#b]?)(\d)$/);
   if (!match) return false;
 
