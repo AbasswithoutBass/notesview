@@ -1,3 +1,4 @@
 name = "notesview"
+account_id = "233b380af263d774ff36337fdefb2572"
 compatibility_date = "2024-12-19"
 pages_build_output_dir = "dist"
