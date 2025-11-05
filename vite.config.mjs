@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react'
 // Vite 配置文件
 export default defineConfig({
   plugins: [react()],
+  // 允许通过环境变量覆盖 base，便于在 GitHub Pages 的子路径（/notesview/）下部署
+  base: process.env.BASE_PATH || '/',
   root: '.', // 项目根目录
   build: {
     outDir: 'dist', // 打包输出目录
