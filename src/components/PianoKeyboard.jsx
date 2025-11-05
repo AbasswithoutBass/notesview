@@ -65,7 +65,7 @@ export default function PianoKeyboard({ onPlayNote, currentNote }) {
           <PianoKey
             key={note}
             note={note + '4'}
-            onClick={handlePlay}
+            onTrigger={handlePlay}
             isActive={activeKey === note + '4'}
           />
         ))}
@@ -93,7 +93,7 @@ export default function PianoKeyboard({ onPlayNote, currentNote }) {
             <PianoKey
               note={note + '4'}
               isBlack
-              onClick={handlePlay}
+              onTrigger={handlePlay}
               isActive={activeKey === note + '4'}
             />
           </div>

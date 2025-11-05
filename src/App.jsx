@@ -5,7 +5,8 @@
 
 import { useAudio } from './hooks/useAudio.jsx';
 import { usePractice } from './hooks/usePractice.jsx';
-import { useState, useEffect, useCallback } from 'react';
+import { useMidi } from './hooks/useMidi.jsx';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { mapKeyToNote, KEYBOARD_LAYOUTS } from './utils/keymap';
 import PracticeMode from './components/Practice/PracticeMode';
 import Statistics from './components/Practice/Statistics';
@@ -23,6 +24,9 @@ function App() {
   const [showStats, setShowStats] = useState(false);
   const [enforceLandscape, setEnforceLandscape] = useState(false);
   const [isLandscape, setIsLandscape] = useState(true);
+  const [isMidiConnecting, setIsMidiConnecting] = useState(false);
+
+  const activeMidiNotes = useRef(new Set());
 
   // 初始化 Hooks
   const practice = usePractice();
@@ -125,6 +129,52 @@ function App() {
       practice.handleNoteInput,
     ]
   );
+
+  // MIDI 处理函数
+  const handleMidiNoteOn = useCallback(({ note: midiNote, velocity }) => {
+    if (inputDisabled) return;
+    const active = activeMidiNotes.current;
+    if (active.has(midiNote)) return;
+    active.add(midiNote);
+    handlePlay(midiNote, { source: 'midi', velocity });
+  }, [handlePlay, inputDisabled]);
+
+  const handleMidiNoteOff = useCallback(({ note: midiNote }) => {
+    activeMidiNotes.current.delete(midiNote);
+  }, []);
+
+  const midi = useMidi({
+    onNoteOn: handleMidiNoteOn,
+    onNoteOff: handleMidiNoteOff
+  });
+
+  useEffect(() => {
+    if (inputDisabled) {
+      activeMidiNotes.current.clear();
+    }
+  }, [inputDisabled]);
+
+  const handleToggleMidi = useCallback(async () => {
+    if (!midi.isSupported) {
+      alert('当前浏览器尚未支持 MIDI 设备访问，请使用支持 Web MIDI 的浏览器。');
+      return;
+    }
+
+    if (midi.isEnabled) {
+      midi.disconnect();
+      return;
+    }
+
+    try {
+      setIsMidiConnecting(true);
+      const success = await midi.connect();
+      if (!success && midi.error) {
+        alert(`连接 MIDI 失败：${midi.error}`);
+      }
+    } finally {
+      setIsMidiConnecting(false);
+    }
+  }, [midi]);
 
   const showOrientationOverlay = inputDisabled;
 
@@ -301,6 +351,41 @@ function App() {
             >
               统计信息
             </button>
+            <button
+              onClick={handleToggleMidi}
+              disabled={isMidiConnecting}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: midi.isEnabled ? '#10b981' : '#f3f4f6',
+                color: midi.isEnabled ? '#ffffff' : '#4b5563',
+                borderRadius: '0.5rem',
+                border: 'none',
+                cursor: isMidiConnecting ? 'wait' : 'pointer',
+                opacity: isMidiConnecting ? 0.6 : 1,
+                minWidth: '110px',
+                marginLeft: 'auto'
+              }}
+            >
+              {midi.isEnabled ? '断开 MIDI' : '连接 MIDI'}
+            </button>
+            {midi.isEnabled && (
+              <span style={{
+                fontSize: '0.85rem',
+                color: '#047857',
+                fontWeight: 600
+              }}>
+                已连接：{midi.devices.length ? midi.devices.join('、') : 'MIDI 设备'}
+              </span>
+            )}
+            {midi.error && !midi.isEnabled && (
+              <span style={{
+                fontSize: '0.8rem',
+                color: '#b91c1c',
+                fontWeight: 500
+              }}>
+                {midi.error}
+              </span>
+            )}
           </div>
         )}
       </header>
