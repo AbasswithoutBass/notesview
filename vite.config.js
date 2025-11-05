@@ -7,14 +7,32 @@ export default defineConfig({
   plugins: [react()],
   root: '.', // 项目根目录
   build: {
-    outDir: 'dist' // 打包输出目录
+    outDir: 'dist', // 打包输出目录
+    sourcemap: false, // 生产环境不生成 source maps
+    minify: 'esbuild', // 使用 esbuild 进行代码压缩（内置）
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vexflow': ['vexflow'],
+          'tone': ['tone']
+        }
+      }
+    }
   },
   server: {
-    port: 5175, // 启动端口
-    open: true, // 自动打开浏览器
+    port: 5183,
+    strictPort: true,
+    open: true,
     hmr: {
+      protocol: 'ws',
       host: 'localhost',
-      port: 5175
+      port: 5183,
+      timeout: 30000,
+      overlay: true
+    },
+    watch: {
+      usePolling: true,
+      interval: 100
     }
   }
 })

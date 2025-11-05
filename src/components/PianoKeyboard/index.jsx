@@ -33,9 +33,13 @@ export default function PianoKeyboard({ onPlayNote, currentNote }) {
     }
   }, [currentNote]);
 
-  const handlePlay = note => {
+  const handlePlay = (note, velocity = 0.85) => {
     setActiveKey(note);
-    if (onPlayNote) onPlayNote(note);
+    onPlayNote?.(note, {
+      source: 'virtual-keyboard',
+      velocity
+    });
+    setTimeout(() => setActiveKey(null), 200);
   };
 
   return (
@@ -45,7 +49,8 @@ export default function PianoKeyboard({ onPlayNote, currentNote }) {
       justifyContent: 'center',
       marginTop: '1.5rem',
       width: 'fit-content',
-      margin: '1.5rem auto'
+        margin: '1.5rem auto',
+        userSelect: 'none'
     }}>
       {/* 白键 */}
       <div style={{ 
@@ -60,9 +65,9 @@ export default function PianoKeyboard({ onPlayNote, currentNote }) {
         {WHITE_KEYS.map((note) => (
           <PianoKey
             key={note}
-            note={note + '4'}
-            onClick={handlePlay}
-            isActive={activeKey === note + '4'}
+            note={`${note}4`}
+            onTrigger={(value) => handlePlay(value, 0.82)}
+            isActive={activeKey === `${note}4`}
           />
         ))}
       </div>
@@ -85,10 +90,10 @@ export default function PianoKeyboard({ onPlayNote, currentNote }) {
             }}
           >
             <PianoKey
-              note={note + '4'}
+              note={`${note}4`}
               isBlack
-              onClick={handlePlay}
-              isActive={activeKey === note + '4'}
+              onTrigger={(value) => handlePlay(value, 0.92)}
+              isActive={activeKey === `${note}4`}
             />
           </div>
         ))}
